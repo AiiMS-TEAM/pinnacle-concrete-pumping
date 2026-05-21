@@ -458,12 +458,16 @@ p { margin: 0 0 1em; color: var(--body); }
 .nav-cta { display: inline-flex; }
 .nav-toggle {
     display: none;
-    background: none;
+    background: transparent;
     border: 0;
     padding: 6px;
     cursor: pointer;
     color: var(--ink);
+    align-items: center;
+    justify-content: center;
+    transition: background .25s ease, color .25s ease, width .25s ease, height .25s ease, border-radius .25s ease, box-shadow .25s ease, transform .25s ease;
 }
+.nav-toggle .material-icons { transition: color .25s ease; font-size: 28px; }
 
 /* ---------- Hero (contained dark card on light page) ---------- */
 .hero {
@@ -1887,6 +1891,28 @@ p { margin: 0 0 1em; color: var(--body); }
         gap: 12px;
         margin-left: auto;
     }
+
+    /* Floating hamburger on scroll (mobile) */
+    .site-header.scrolled .nav-toggle {
+        position: fixed;
+        top: 14px;
+        right: 16px;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--brand-pink);
+        color: #fff;
+        box-shadow: 0 10px 28px rgba(202, 6, 94, 0.40), 0 4px 10px rgba(15, 15, 30, 0.18);
+        z-index: 1050;
+    }
+    .site-header.scrolled .nav-toggle:hover { background: #A30449; transform: scale(1.04); }
+    .site-header.scrolled .nav-toggle .material-icons { color: #fff; font-size: 26px; }
+    .site-header.scrolled .nav-mobile-extras {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s ease;
+    }
+    .site-header.scrolled .brand-logo { opacity: 0.85; }
 }
 
 /* Mobile bottom navigation */
