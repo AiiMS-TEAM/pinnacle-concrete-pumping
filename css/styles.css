@@ -493,7 +493,7 @@ p { margin: 0 0 1em; color: var(--body); }
     content: "";
     position: absolute;
     inset: 0;
-    background: url('../images/iStock-171252466.jpg') center/cover no-repeat;
+    background: url('../images/iStock-171252466.webp') center/cover no-repeat;
     opacity: 0.10;
     mix-blend-mode: screen;
     pointer-events: none;
