@@ -1434,7 +1434,7 @@ p { margin: 0 0 1em; color: var(--body); }
     counter-reset: why-counter;
 }
 .why-image {
-    background: #0E0F1E;
+    background: var(--brand-pink);
     border-radius: 6px;
     overflow: hidden;
     display: flex;
