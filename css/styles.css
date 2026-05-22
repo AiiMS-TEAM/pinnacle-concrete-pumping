@@ -652,6 +652,12 @@ body.scrolled .hero > .container {
     .mini-divider { display: none; }
     .mini-feature { flex: 1 0 45%; }
 }
+@media (max-width: 600px) {
+    .hero-mini-features { flex-direction: column; gap: 14px; }
+    .mini-feature { flex: 1 1 100%; width: 100%; display: flex; align-items: center; gap: 12px; }
+    .mini-feature-icon { margin-bottom: 0; flex-shrink: 0; }
+    .mini-feature p { margin: 0; }
+}
 @media (max-width: 480px) {
     .hero { padding: 0 0 48px; }
     .hero > .container { padding-top: 0; margin-top: 0; }
