@@ -653,15 +653,19 @@ body.scrolled .hero > .container {
     .mini-feature { flex: 1 0 45%; }
 }
 @media (max-width: 600px) {
-    .hero-mini-features { flex-direction: column; gap: 14px; }
-    .mini-feature { flex: 1 1 100%; width: 100%; display: flex; align-items: center; gap: 12px; }
+    .hero-mini-features { flex-direction: column; gap: 14px; align-items: center; }
+    .mini-feature { flex: 1 1 100%; width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px; text-align: center; }
     .mini-feature-icon { margin-bottom: 0; flex-shrink: 0; }
     .mini-feature p { margin: 0; }
+    .hero-card-content { text-align: center; align-items: center; }
+    .hero-headline { text-align: center; align-items: center; }
+    .hero-headline-script { align-self: center; transform: rotate(-4deg); }
+    .hero-ctas { justify-content: center; }
 }
 @media (max-width: 480px) {
     .hero { padding: 0 0 48px; }
     .hero > .container { padding-top: 0; margin-top: 0; }
-    .hero-card { padding: 36px 24px 240px; }
+    .hero-card { padding: 72px 24px 240px; }
     .hero-card .hero-ctas .btn { width: 100%; }
 }
 
