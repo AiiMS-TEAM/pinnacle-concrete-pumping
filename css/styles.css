@@ -146,12 +146,14 @@ p { margin: 0 0 1em; color: var(--body); }
     padding: 0 24px;
 }
 
-/* Hero + header expand wider at top, shrink on scroll */
+/* Utility bar + header + hero share width — expand at top, shrink on scroll */
+.utility-bar .container.utility-inner,
 .site-header .container.nav-inner,
 .hero > .container {
     max-width: 1600px;
     transition: max-width .35s cubic-bezier(.4, 0, .2, 1);
 }
+body.scrolled .utility-bar .container.utility-inner,
 body.scrolled .site-header .container.nav-inner,
 body.scrolled .hero > .container {
     max-width: var(--container);
