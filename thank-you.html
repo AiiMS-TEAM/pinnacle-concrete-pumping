@@ -26,7 +26,7 @@
 
 
     <!-- reCAPTCHA v3 -->
-    <script src="https://www.google.com/recaptcha/api.js?render=6LfKPfcsAAAAAC2ddUWKwNb5GXaeEZOsuUCRB_ro"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LfKPfcsAAAAAC2ddUWKwNb5GXaeEZOsuUCRB_ro" async defer></script>
 
     <style>
         :root { --brand-accent: #CA065E; }
@@ -317,7 +317,8 @@
             <div class="offer-copy">
                 <img src="images/Promo.webp" alt="10% OFF Your First Service" class="offer-promo" />
             </div>
-            <form class="quote-form" id="quoteForm" novalidate>
+            <form class="quote-form" id="quoteForm" action="https://api.pinnacleconcretepumping.com.au/form-quote.php" method="POST" novalidate>
+                <input type="hidden" name="recaptcha_token" />
                 <h3 class="quote-form-heading">Quick form. Fast quote. <span class="quote-form-script">No fuss.</span></h3>
                 <div class="form-row">
                     <label>
@@ -645,7 +646,8 @@
                 <h2>Lock in your pour.</h2>
                 <p>Drop your details and we'll come back with a free quote, fast.</p>
             </div>
-            <form class="mini-form" id="miniForm" novalidate>
+            <form class="mini-form" id="miniForm" action="https://api.pinnacleconcretepumping.com.au/form.php" method="POST" novalidate>
+                <input type="hidden" name="recaptcha_token" />
                 <input type="text" name="name" placeholder="Full Name" required />
                 <input type="tel" name="phone" placeholder="Phone" required autocomplete="off" maxlength="10" inputmode="numeric" onkeypress="return /[0-9]/.test(event.key)" pattern="^(04|02|03|07|08)[0-9]{8}$" title="Please enter a valid phone number." />
                 <input type="email" name="email" placeholder="Email" required />

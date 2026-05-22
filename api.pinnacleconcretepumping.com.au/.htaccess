@@ -1,40 +1,9 @@
-# ============================================
-# Pinnacle Concrete Pumping - API .htaccess
-# ============================================
-
-# Force HTTPS
-RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Block access to sensitive dotfiles (.env, .git, etc.)
+# Block direct HTTP access to dotfiles (.env, .git, etc.)
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
 
-# Explicit deny for .env (defense in depth)
+# Belt-and-braces: explicitly deny .env in case the rule above is overridden.
 <Files ".env">
     Require all denied
 </Files>
-
-<Files ".env.example">
-    Require all denied
-</Files>
-
-# Block access to any *.env* file (e.g. .env.local, .env.backup)
-<FilesMatch "\.env(\..*)?$">
-    Require all denied
-</FilesMatch>
-
-# Disable directory listing
-Options -Indexes
-
-# Default character set
-AddDefaultCharset UTF-8
-
-# Security headers
-<IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "SAMEORIGIN"
-    Header set Referrer-Policy "strict-origin-when-cross-origin"
-</IfModule>

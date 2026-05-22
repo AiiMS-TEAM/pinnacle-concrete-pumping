@@ -5,10 +5,8 @@
 (function () {
     'use strict';
 
-    // ----- Configuration -----
-    var API_BASE = 'https://api.pinnacleconcretepumping.com.au';
-    var RECAPTCHA_SITE_KEY = 'YOUR_RECAPTCHA_SITE_KEY';
-    var THANK_YOU_URL = 'thank-you.html';
+    // ----- reCAPTCHA v3 site key (public — secret lives in cPanel .env) -----
+    var RECAPTCHA_SITE_KEY = '6LfKPfcsAAAAAC2ddUWKwNb5GXaeEZOsuUCRB_ro';
 
     // Footer year
     var yearEl = document.getElementById('year');
@@ -57,119 +55,106 @@
         });
     }
 
-    // ----- Form validation helpers -----
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var phoneRegex = /^[\d\s\+\-\(\)]{6,}$/;
+    /* ---------- Form submission ----------
+       Submits JSON to the form's action URL (cPanel-hosted PHP on
+       api.pinnacleconcretepumping.com.au). Server-side performs reCAPTCHA +
+       field validation and returns { ok, message, errors }. Site key is
+       public — secret + mail config live on the cPanel host in .env. */
+    function bindForm(form, action) {
+        if (!form) return;
+        var submitBtn = form.querySelector('button[type="submit"]');
+        var originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
 
-    function setFieldError(field, hasError) {
-        field.style.borderColor = hasError ? '#E91E8C' : '';
-    }
-
-    function validateForm(form) {
-        var valid = true;
-        var fields = form.querySelectorAll('[required]');
-        fields.forEach(function (field) {
-            var value = (field.value || '').trim();
-            var fieldValid = value.length > 0;
-
-            if (fieldValid && field.type === 'email') {
-                fieldValid = emailRegex.test(value);
-            }
-            if (fieldValid && field.type === 'tel') {
-                fieldValid = phoneRegex.test(value);
-            }
-
-            setFieldError(field, !fieldValid);
-            if (!fieldValid) valid = false;
-        });
-        return valid;
-    }
-
-    // ----- reCAPTCHA token -----
-    function getRecaptchaToken(action) {
-        return new Promise(function (resolve, reject) {
-            if (typeof grecaptcha === 'undefined') {
-                reject(new Error('reCAPTCHA not loaded'));
-                return;
-            }
-            grecaptcha.ready(function () {
-                grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: action })
-                    .then(resolve)
-                    .catch(reject);
+        function markInvalid(el, bad) {
+            if (!el) return;
+            el.classList.toggle('is-invalid', !!bad);
+        }
+        function clearInvalid() {
+            form.querySelectorAll('.is-invalid').forEach(function (el) {
+                el.classList.remove('is-invalid');
             });
+        }
+
+        // Clear invalid state as user fixes fields
+        form.addEventListener('input', function (e) {
+            if (e.target.classList && e.target.classList.contains('is-invalid')) {
+                markInvalid(e.target, false);
+            }
         });
-    }
 
-    // ----- Generic submitter -----
-    function submitForm(form, endpoint, action, btnLoadingText) {
-        var btn = form.querySelector('button[type="submit"]');
-        if (!btn) return;
-        var originalHtml = btn.innerHTML;
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearInvalid();
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Sending…';
+            }
 
-        btn.disabled = true;
-        btn.innerHTML = btnLoadingText || 'Sending…';
+            var post = function (token) {
+                var hidden = form.querySelector('input[name="recaptcha_token"]');
+                if (hidden) hidden.value = token || '';
 
-        getRecaptchaToken(action)
-            .then(function (token) {
-                var formData = new FormData(form);
-                formData.append('recaptcha_token', token);
+                var payload = {};
+                new FormData(form).forEach(function (v, k) { payload[k] = v; });
 
-                return fetch(API_BASE + endpoint, {
+                fetch(form.action || action, {
                     method: 'POST',
-                    body: formData
-                });
-            })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    return { ok: response.ok, data: data };
-                });
-            })
-            .then(function (result) {
-                if (result.ok && result.data && result.data.success) {
-                    window.location.href = THANK_YOU_URL;
-                } else {
-                    var msg = (result.data && result.data.message) ? result.data.message : 'Something went wrong. Please try again or call us.';
-                    alert(msg);
-                    btn.disabled = false;
-                    btn.innerHTML = originalHtml;
-                }
-            })
-            .catch(function () {
-                alert('Network error. Please try again or call 1300 688 390.');
-                btn.disabled = false;
-                btn.innerHTML = originalHtml;
-            });
-    }
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(payload),
+                })
+                    .then(function (r) {
+                        return r.json().catch(function () { return null; });
+                    })
+                    .then(function (data) {
+                        if (!data) {
+                            alert('Unexpected server response. Please try again.');
+                            return;
+                        }
+                        if (data.ok) {
+                            // Redirect to thank-you page so Google tracking /
+                            // conversion scripts there fire exactly once per lead.
+                            window.location.href = 'thank-you.html';
+                            return;
+                        }
+                        (data.errors || []).forEach(function (name) {
+                            markInvalid(form.elements[name], true);
+                        });
+                        alert(data.message || 'Please check the form and try again.');
+                        var firstBad = form.querySelector('.is-invalid');
+                        if (firstBad && firstBad.focus) firstBad.focus();
+                    })
+                    .catch(function () {
+                        alert('Network error. Please try again or call 1300 688 390.');
+                    })
+                    .then(function () {
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnHtml;
+                        }
+                    });
+            };
 
-    // ----- Quote form (large form) -> form-quote.php -----
-    var quoteForm = document.getElementById('quoteForm');
-    if (quoteForm) {
-        quoteForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (!validateForm(quoteForm)) return;
-            submitForm(
-                quoteForm,
-                '/form-quote.php',
-                'quote_form',
-                '<span class="material-icons">hourglass_top</span>Sending…'
-            );
+            var hasKey = RECAPTCHA_SITE_KEY && RECAPTCHA_SITE_KEY.indexOf('YOUR_') !== 0;
+            if (hasKey && window.grecaptcha && window.grecaptcha.ready) {
+                window.grecaptcha.ready(function () {
+                    window.grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: form.id || 'form' })
+                        .then(post)
+                        .catch(function () { post(''); });
+                });
+            } else {
+                post('');
+            }
         });
     }
 
-    // ----- Mini form (simple) -> form.php -----
-    var miniForm = document.getElementById('miniForm');
-    if (miniForm) {
-        miniForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (!validateForm(miniForm)) return;
-            submitForm(
-                miniForm,
-                '/form.php',
-                'mini_form',
-                'Sending…'
-            );
-        });
-    }
+    bindForm(
+        document.getElementById('quoteForm'),
+        'https://api.pinnacleconcretepumping.com.au/form-quote.php'
+    );
+    bindForm(
+        document.getElementById('miniForm'),
+        'https://api.pinnacleconcretepumping.com.au/form.php'
+    );
 
     // Smooth scroll fix for sticky header offset
     document.querySelectorAll('a[href^="#"]').forEach(function (link) {
