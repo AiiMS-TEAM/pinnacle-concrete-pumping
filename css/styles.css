@@ -936,17 +936,15 @@ p { margin: 0 0 1em; color: var(--body); }
 }
 .offer-promo {
     width: 100%;
-    height: 100%;
-    max-width: none;
-    object-fit: cover;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
     display: block;
-    min-height: 0;
 }
 .offer-copy {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    overflow: hidden;
 }
 .quote-form label {
     display: block;
